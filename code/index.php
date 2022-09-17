@@ -160,3 +160,15 @@ foreach ($arr as $item)
 	}
 }
 myEcho($n);
+
+myEcho("\n15. Функции");
+myEcho("● Напишите функцию printStringReturnNumber(), которая печатает строку и возвращает числовое значение.");
+function printStringReturnNumber(int $number): int
+{
+	myEcho($number);
+	return $number;
+}
+myEcho("● Запишите возвращаемое значение вашей функции в переменную с именем \$my_num");
+$my_num = printStringReturnNumber(3);
+myEcho("● Распечатайте \$my_num.");
+myEcho($my_num);
