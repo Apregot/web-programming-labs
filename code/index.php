@@ -80,3 +80,83 @@ echo '<form action="" method="post">
     	<input type="submit" value="Отправить">
   	  </form>';
 echo '<a href="c.php">Перейти к просмотру</a>';
+
+myEcho("3. Файлы 
+a. Написать доску объявлений. Пользователь указывает свой email, текст объявления, заголовок объявления (форма), категория. Для хранения объявлений использовать файлы.
+	i. Создать несколько папок категорий.
+	ii. Необходимо чтобы на странице была форма с полями (email, выбор категории(название выше созданных папок), заголовок объявления и текст объявления, кнопка Добавить).
+	iii. После формы список уже загруженных объявлений в виде таблички.
+	iv. После того, как пользователь нажал кнопку “добавить”, необходимо создать новый текстовый файл категория/заголовок_объявления.txt, содержимое файла - Текст объявления"
+);
+function myScanDir(string $dir): array
+{
+	return array_diff(scandir($dir), ['..', '.']);
+}
+function getFiles(array $directories): array
+{
+	$result = [];
+	foreach ($directories as $directory)
+	{
+		$files = myScanDir('files/' .$directory);
+		foreach ($files as $file)
+		{
+			$path = 'files/' . $directory . '/' . $file;
+			$content = file_get_contents($path);
+			$result[] = [
+				'category' => $directory,
+				'header' => preg_replace('/.txt$/','', $file),
+				'content' => $content,
+			];
+		}
+	}
+	return $result;
+}
+$categories = myScanDir('./files');
+
+$categoriesHTML = '';
+foreach ($categories as $category)
+{
+	$categoriesHTML .= "<option>$category</option>";
+}
+
+echo '<form action="" method="post">
+		<p>Введите email<p>
+    	<input type="email" name="email"/>
+    	<p>Выберите категорию<p>
+    	<select name="category">'
+		. $categoriesHTML .
+    	'</select>
+    	<p>Введите заголовок объявления<p>
+    	<input type="text" name="header"/>
+    	<p>Введите текст объявления<p>
+    	<textarea rows="10" cols="40" name="content"></textarea>
+    	<input type="submit" value="Отправить">
+  	  </form>';
+if (
+	array_key_exists('email', $_POST)
+	&& array_key_exists('category', $_POST)
+	&& array_key_exists('header', $_POST)
+	&& array_key_exists('content', $_POST)
+)
+{
+	$file = fopen('files/' . $_POST['category'] . '/' . $_POST['header'] .'.txt', 'wb');
+	fwrite($file, $_POST['content']);
+}
+$ads = getFiles($categories);
+$tableContent = '';
+foreach ($ads as $ad)
+{
+	$tableContent .= '<tr><td>'.$ad['category'].'</td><td>'.$ad['header'].'</td><td>'.$ad['content'].'</td></tr>';
+}
+
+if ($tableContent)
+{
+	echo '<table border="1">
+  			<tr>
+    		<th>Категория</th>
+			<th>Заголовок</th>
+    		<th>Текст</th>
+  			</tr>
+  			'.$tableContent.'
+		  </table>';
+}
