@@ -1,56 +1,20 @@
 <?php
-error_reporting(E_ERROR | E_PARSE);
-require_once ('../vendor/autoload.php');
+//При выполнении работы старался следовать принципам чистого кода, изложенным в описании лр8
+require_once 'dictionary.php';
+require_once 'functions.php';
 
-$googleAccountKeyFilePath = __DIR__ . '/assets/sheets-integration-for-ads-1bd62cdb84ca.json';
-putenv( 'GOOGLE_APPLICATION_CREDENTIALS=' . $googleAccountKeyFilePath );
+$database = connectDatabase(DB_CONNECTION_DATA);
 
-$client = new Google_Client();
-$client->useApplicationDefaultCredentials();
-
-
-$client->addScope( 'https://www.googleapis.com/auth/spreadsheets' );
-
-$service = new Google_Service_Sheets( $client );
-
-
-$spreadsheetId = '1qQcfLedf2YMp03mL_3lbyKNVyggwPKUFNttXrsVNlIY';
-
-//Отправка запроса
-if (
-	array_key_exists('email', $_POST)
-	&& array_key_exists('category', $_POST)
-	&& array_key_exists('header', $_POST)
-	&& array_key_exists('content', $_POST)
-)
+if (hasNeededParametersToAddAd($_POST))
 {
-	$values = [[$_POST['email'], $_POST['category'], $_POST['header'], $_POST['content']]];
-
-	$body = new Google_Service_Sheets_ValueRange();
-	$body->setValues($values);
-	$options = array( 'valueInputOption' => 'RAW' );
-	$service->spreadsheets_values->append( $spreadsheetId, 'Лист1', $body, $options );
-
+	addAd($database, $_POST);
 	header('Location: index.php');
 }
 
-$categories = ['Жильё', 'Покупка', 'Продажа', 'Работа'];
-$categoriesHTML = '';
-foreach ($categories as $category)
-{
-	$categoriesHTML .= "<option>$category</option>";
-}
+printForm(CATEGORIES);
 
-echo '<form action="" method="post">
-		<p>Введите email<p>
-    	<input type="email" name="email"/>
-    	<p>Выберите категорию<p>
-    	<select name="category">'
-		. $categoriesHTML .
-    	'</select>
-    	<p>Введите заголовок объявления<p>
-    	<input type="text" name="header"/>
-    	<p>Введите текст объявления<p>
-    	<textarea rows="10" cols="40" name="content"></textarea>
-    	<input type="submit" value="Отправить">
-  	  </form>';
+$ads = getAds($database);
+if (count($ads) > 0)
+{
+	printAds($ads);
+}
