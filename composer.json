@@ -1,9 +1,0 @@
-{
-    "require": {
-        "google/apiclient": "2.0"
-    }
-    ,
-    "require-dev": {
-        "roave/security-advisories": "dev-latest"
-    }
-}
